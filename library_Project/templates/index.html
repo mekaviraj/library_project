@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Library Management System</h1>
+            <div class="user-info">
+                Welcome, {{ session.username }}!
+                {% if session.role == 'admin' %}
+                    <a href="{{ url_for('view_requests') }}" class="admin-link">View Requests</a>
+                    <a href="{{ url_for('reports') }}" class="admin-link">Reports</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+            </div>
+        </header>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if session.role == 'admin' %}
+        <div class="add-book-form">
+            <h2>Add New Book</h2>
+            <form action="{{ url_for('add_book') }}" method="POST">
+                <input type="text" name="title" placeholder="Book Title" required>
+                <input type="text" name="author" placeholder="Author" required>
+                <input type="text" name="isbn" placeholder="ISBN" required>
+                <input type="number" name="quantity" placeholder="Quantity" min="1" required>
+                <button type="submit">Add Book</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="books-list">
+            <h2>Available Books</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>ISBN</th>
+                        <th>Available</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.isbn }}</td>
+                        <td>{{ book.available }}/{{ book.quantity }}</td>
+                        <td>
+                            {% if book.available > 0 %}
+                            <form action="{{ url_for('request_book', book_id=book.book_id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="request-btn">Request</button>
+                            </form>
+                            {% else %}
+                            <span class="unavailable">Unavailable</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html> 
